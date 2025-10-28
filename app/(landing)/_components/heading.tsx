@@ -6,7 +6,7 @@ import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/spinner";
-import { useAuth } from "@/app/hooks/use-auth";
+import { useAuth } from "@/hooks/use-auth";
 import { SignInModal } from "@/components/auth/sign-in-modal";
 
 export const Heading = () => {

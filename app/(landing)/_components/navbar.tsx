@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { useScrollTop } from "@/app/hooks/use-scroll-top";
+import { useScrollTop } from "@/hooks/use-scroll-top";
 import { cn } from "@/lib/utils";
 import Logo from "./logo";
 import { ModeToggle } from "@/components/mode-toggle";
-import { useAuth } from "@/app/hooks/use-auth";
+import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/spinner";
 import Link from "next/link";
