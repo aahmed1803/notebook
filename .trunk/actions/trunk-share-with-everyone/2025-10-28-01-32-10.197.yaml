@@ -1,0 +1,14 @@
+action_id: trunk-share-with-everyone
+date: 2025-10-28 01:32:10
+run: trunk config share --notify --allow-daemon-start=false
+run_from: ""
+trigger: .git/info/exclude
+result:
+  exit_code: 1
+  out: "\x1b[1m\x1b[31m✖ Please run 'trunk init' to setup trunk in this repository.\x1b[0m\n"
+  err: ""
+timestamp: 1761615130
+full_timestamp:
+  nanos: 197086000
+  seconds: 1761615130
+trunk_version: 1.25.0
