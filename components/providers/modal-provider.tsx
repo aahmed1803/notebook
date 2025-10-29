@@ -1,7 +1,7 @@
 "use client";
-import React, { useState, useEffect } from "react";
-import SettingsModal from "../modals/settings-modal";
-import CoverImageModal from "../modals/cover-image-modal";
+
+import { useEffect, useState } from "react";
+import { SettingsModal } from "@/components/modals/settings-modal";
 
 const ModalProvider = () => {
   const [isMounted, setIsMounted] = useState(false);
@@ -13,10 +13,11 @@ const ModalProvider = () => {
   if (!isMounted) {
     return null;
   }
+
   return (
     <>
       <SettingsModal />
-      <CoverImageModal />
+      {/* Add any other global modals here */}
     </>
   );
 };

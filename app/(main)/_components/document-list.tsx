@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { FileIcon } from "lucide-react";
+import { FileIcon, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { getDocuments, createDocument, type Document } from "@/lib/firestore";
 import { cn } from "@/lib/utils";
@@ -48,6 +48,23 @@ const DocumentList = ({
     }));
   };
 
+  const handleCreateNote = async (parentId: string) => {
+    try {
+      const documentId = await createDocument({
+        title: "Untitled Note",
+        type,
+        parentDocument: parentId,
+        isSubject: false,
+      });
+
+      setExpanded((prev) => ({ ...prev, [parentId]: true }));
+      toast.success("Note created!");
+      fetchDocuments();
+    } catch (error: any) {
+      toast.error(error.message || "Failed to create note");
+    }
+  };
+
   if (isLoading) {
     return (
       <>
@@ -84,15 +101,30 @@ const DocumentList = ({
             documentIcon={document.icon}
             active={false}
             level={level}
-            onExpand={() => onExpand(document.id)}
+            onExpand={document.isSubject ? () => onExpand(document.id) : undefined}
             expanded={expanded[document.id]}
           />
-          {expanded[document.id] && (
-            <DocumentList
-              type={type}
-              parentDocumentId={document.id}
-              level={level + 1}
-            />
+          {/* Show nested notes only for subjects */}
+          {document.isSubject && expanded[document.id] && (
+            <>
+              <DocumentList
+                type={type}
+                parentDocumentId={document.id}
+                level={level + 1}
+              />
+              {/* Add note button */}
+              <div
+                onClick={() => handleCreateNote(document.id)}
+                role="button"
+                style={{
+                  paddingLeft: `${(level + 1) * 12 + 12}px`,
+                }}
+                className="group min-h-[27px] text-sm py-1 pr-3 w-full hover:bg-primary/5 flex items-center text-muted-foreground font-medium"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                <span>Add note</span>
+              </div>
+            </>
           )}
         </div>
       ))}
