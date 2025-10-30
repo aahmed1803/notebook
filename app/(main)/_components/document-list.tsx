@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { FileIcon, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { getDocuments, createDocument, type Document } from "@/lib/firestore";
 import { cn } from "@/lib/utils";
 import Item from "./item";
+import { useDocument } from "@/hooks/use-document";
 
 interface DocumentListProps {
   type: "studyhub" | "private";
@@ -20,13 +21,29 @@ const DocumentList = ({
   level = 0,
 }: DocumentListProps) => {
   const router = useRouter();
+  const params = useParams();
   const [documents, setDocuments] = useState<Document[]>([]);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [isLoading, setIsLoading] = useState(true);
+  const { getDocument: getGlobalDocument } = useDocument();
 
   useEffect(() => {
     fetchDocuments();
   }, [type, parentDocumentId]);
+
+  // Listen for updates from global state
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setDocuments((prevDocs) => {
+        return prevDocs.map((doc) => {
+          const updated = getGlobalDocument(doc.id);
+          return updated && updated.title !== doc.title ? updated : doc;
+        });
+      });
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, [getGlobalDocument]);
 
   const fetchDocuments = async () => {
     try {
@@ -99,13 +116,12 @@ const DocumentList = ({
             label={document.title}
             icon={FileIcon}
             documentIcon={document.icon}
-            active={false}
+            active={params.documentId === document.id}
             level={level}
             onExpand={document.isSubject ? () => onExpand(document.id) : undefined}
             expanded={expanded[document.id]}
-            isSubject={document.isSubject} // NEW: Pass isSubject prop
+            isSubject={document.isSubject}
           />
-          {/* Show nested notes only for subjects */}
           {document.isSubject && expanded[document.id] && (
             <>
               <DocumentList
@@ -113,7 +129,6 @@ const DocumentList = ({
                 parentDocumentId={document.id}
                 level={level + 1}
               />
-              {/* Add note button */}
               <div
                 onClick={() => handleCreateNote(document.id)}
                 role="button"

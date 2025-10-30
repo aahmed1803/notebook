@@ -8,6 +8,7 @@ import Banner from "./banner";
 import Menu from "./menu";
 import { getDocument, type Document } from "@/lib/firestore";
 import { toast } from "sonner";
+import { useDocument } from "@/hooks/use-document";
 
 interface NavbarProps {
   isCollapsed: boolean;
@@ -17,11 +18,18 @@ interface NavbarProps {
 const Navbar = ({ isCollapsed, onResetWidth }: NavbarProps) => {
   const params = useParams();
   const [document, setDocument] = useState<Document | null | undefined>(undefined);
+  const { getDocument: getGlobalDocument } = useDocument();
 
   useEffect(() => {
     if (!params.documentId || typeof params.documentId !== "string") {
       setDocument(null);
       return;
+    }
+
+    // Check global state first
+    const cachedDoc = getGlobalDocument(params.documentId);
+    if (cachedDoc) {
+      setDocument(cachedDoc);
     }
 
     const fetchDocument = async () => {
@@ -37,6 +45,20 @@ const Navbar = ({ isCollapsed, onResetWidth }: NavbarProps) => {
 
     fetchDocument();
   }, [params.documentId]);
+
+  // Listen for updates from global state
+  useEffect(() => {
+    if (!params.documentId || typeof params.documentId !== "string") return;
+
+    const interval = setInterval(() => {
+      const updatedDoc = getGlobalDocument(params.documentId as string);
+      if (updatedDoc && document && updatedDoc.title !== document.title) {
+        setDocument(updatedDoc);
+      }
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, [params.documentId, document, getGlobalDocument]);
 
   if (document === undefined) {
     return (
