@@ -25,6 +25,7 @@ interface ItemProps {
   label: string;
   onClick?: () => void;
   icon: LucideIcon;
+  isSubject?: boolean; // NEW: Add this prop
 }
 
 const Item = ({
@@ -38,6 +39,7 @@ const Item = ({
   level = 0,
   onExpand,
   expanded,
+  isSubject = false, // NEW: Default to false
 }: ItemProps) => {
   const router = useRouter();
 
@@ -73,7 +75,8 @@ const Item = ({
         active && "bg-primary/5 text-primary"
       )}
     >
-      {!!id && (
+      {/* Only show chevron for subjects */}
+      {!!id && isSubject && (
         <div
           role="button"
           className="h-full rounded-sm hover:bg-neutral-300 dark:hover:bg-neutral-600 mr-1"
@@ -81,6 +84,10 @@ const Item = ({
         >
           <ChevronIcon className="h-4 w-4 shrink-0 text-muted-foreground/50" />
         </div>
+      )}
+      {/* Add spacing for non-subjects to align with subjects */}
+      {!!id && !isSubject && (
+        <div className="h-4 w-4 mr-1" />
       )}
       {documentIcon ? (
         <div className="shrink-0 mr-2 text-[18px]">{documentIcon}</div>

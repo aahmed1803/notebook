@@ -103,6 +103,7 @@ const DocumentList = ({
             level={level}
             onExpand={document.isSubject ? () => onExpand(document.id) : undefined}
             expanded={expanded[document.id]}
+            isSubject={document.isSubject} // NEW: Pass isSubject prop
           />
           {/* Show nested notes only for subjects */}
           {document.isSubject && expanded[document.id] && (

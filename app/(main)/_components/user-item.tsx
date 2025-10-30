@@ -62,10 +62,12 @@ const UserItem = () => {
         </div>
       </DropdownMenuTrigger>
       <DropdownMenuContent
-        className="w-80"
+        className="w-80 z-99999"
         align="start"
         alignOffset={11}
         forceMount
+        side="right"
+        sideOffset={8}
       >
         <div className="flex flex-col space-y-4 p-2">
           <p className="text-xs font-medium leading-none text-muted-foreground">
@@ -90,7 +92,7 @@ const UserItem = () => {
           asChild
           className="w-full cursor-pointer text-muted-foreground"
         >
-          <button onClick={handleSignOut} className="w-full">
+          <button onClick={handleSignOut} className="w-full text-left">
             Log out
           </button>
         </DropdownMenuItem>
