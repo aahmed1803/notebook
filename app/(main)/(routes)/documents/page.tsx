@@ -9,9 +9,14 @@ import { useRouter } from "next/navigation";
 import { createDocument } from "@/lib/firestore";
 import { auth } from "@/lib/firebase";
 
+import { useDocument } from "@/hooks/use-document";
+import { getDocument } from "@/lib/firestore";
+
 const DocumentsPage = () => {
   const router = useRouter();
   const user = auth.currentUser;
+  const { addDocument } = useDocument();
+
 
   const onCreate = async () => {
     try {
@@ -20,7 +25,11 @@ const DocumentsPage = () => {
         type: "private",
         isSubject: false,
       });
-
+  
+      // Fetch and add to global state
+      const newDoc = await getDocument(documentId);
+      addDocument(newDoc);
+  
       toast.success("Note created successfully!");
       router.push(`/documents/${documentId}`);
     } catch (error: any) {

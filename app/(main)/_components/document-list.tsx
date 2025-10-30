@@ -22,34 +22,36 @@ const DocumentList = ({
 }: DocumentListProps) => {
   const router = useRouter();
   const params = useParams();
-  const [documents, setDocuments] = useState<Document[]>([]);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [isLoading, setIsLoading] = useState(true);
-  const { getDocument: getGlobalDocument } = useDocument();
+  const { documentList, setDocumentList } = useDocument();
+
+  // Filter documents based on type and parent
+  const filteredDocuments = documentList.filter((doc) => {
+    if (doc.type !== type) return false;
+    if (parentDocumentId !== undefined) {
+      return doc.parentDocument === parentDocumentId;
+    }
+    return doc.parentDocument === null;
+  });
 
   useEffect(() => {
     fetchDocuments();
   }, [type, parentDocumentId]);
 
-  // Listen for updates from global state
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setDocuments((prevDocs) => {
-        return prevDocs.map((doc) => {
-          const updated = getGlobalDocument(doc.id);
-          return updated && updated.title !== doc.title ? updated : doc;
-        });
-      });
-    }, 100);
-
-    return () => clearInterval(interval);
-  }, [getGlobalDocument]);
-
   const fetchDocuments = async () => {
     try {
       setIsLoading(true);
       const docs = await getDocuments(type, parentDocumentId || null);
-      setDocuments(docs);
+      
+      // Update global state with fetched documents
+      setDocumentList([
+        ...documentList.filter(d => 
+          d.type !== type || 
+          (parentDocumentId !== undefined ? d.parentDocument !== parentDocumentId : d.parentDocument !== null)
+        ),
+        ...docs
+      ]);
     } catch (error: any) {
       console.error("Error fetching documents:", error);
       toast.error(error.message || "Failed to load documents");
@@ -74,9 +76,13 @@ const DocumentList = ({
         isSubject: false,
       });
 
+      // Fetch the created document and add to global state
+      const newDoc = await import("@/lib/firestore").then(m => m.getDocument(documentId));
+      const { addDocument } = useDocument.getState();
+      addDocument(newDoc);
+
       setExpanded((prev) => ({ ...prev, [parentId]: true }));
       toast.success("Note created!");
-      fetchDocuments();
     } catch (error: any) {
       toast.error(error.message || "Failed to create note");
     }
@@ -98,7 +104,7 @@ const DocumentList = ({
 
   return (
     <>
-      {documents.length === 0 && level === 0 && (
+      {filteredDocuments.length === 0 && level === 0 && (
         <p
           className={cn(
             "text-sm font-medium text-muted-foreground/80 px-3 py-1",
@@ -108,7 +114,7 @@ const DocumentList = ({
           No documents
         </p>
       )}
-      {documents.map((document) => (
+      {filteredDocuments.map((document) => (
         <div key={document.id}>
           <Item
             id={document.id}

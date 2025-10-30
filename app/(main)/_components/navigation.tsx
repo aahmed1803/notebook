@@ -25,6 +25,9 @@ import {
 import TrashBox from "./trash-box";
 import useSearch from "@/hooks/use-search";
 import useSettings from "@/hooks/use-settings";
+import { useDocument } from "@/hooks/use-document";
+import { getDocument } from "@/lib/firestore";
+
 import Navbar from "./navbar";
 import { createDocument } from "@/lib/firestore";
 
@@ -35,12 +38,17 @@ const Navigation = () => {
   const params = useParams();
   const pathname = usePathname();
   const isMobile = useMediaQuery("(max-width:768px)");
+  
+  const { addDocument } = useDocument();
 
   const isResizingRef = useRef(false);
   const sidebarRef = useRef<ElementRef<"aside">>(null);
   const navbarRef = useRef<ElementRef<"div">>(null);
   const [isResetting, setIsResetting] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(isMobile);
+
+
+
 
   const handleMouseDown = (
     event: React.MouseEvent<HTMLDivElement, MouseEvent>
@@ -131,14 +139,18 @@ const Navigation = () => {
         type: "studyhub",
         isSubject: true,
       });
-
+  
+      // Fetch and add to global state
+      const newDoc = await getDocument(documentId);
+      addDocument(newDoc);
+  
       toast.success("Subject created successfully!");
       router.push(`/documents/${documentId}`);
     } catch (error: any) {
       toast.error(error.message || "Failed to create subject");
     }
   };
-
+  
   const handleCreatePrivate = async (isSubject: boolean = false) => {
     try {
       const documentId = await createDocument({
@@ -146,7 +158,11 @@ const Navigation = () => {
         type: "private",
         isSubject,
       });
-
+  
+      // Fetch and add to global state
+      const newDoc = await getDocument(documentId);
+      addDocument(newDoc);
+  
       toast.success(
         isSubject ? "Subject created successfully!" : "Note created successfully!"
       );
@@ -155,7 +171,7 @@ const Navigation = () => {
       toast.error(error.message || "Failed to create document");
     }
   };
-
+  
   return (
     <>
       <aside

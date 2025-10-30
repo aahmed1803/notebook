@@ -13,6 +13,7 @@ import {
 import { archiveDocument } from "@/lib/firestore";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { useDocument } from "@/hooks/use-document";
 
 interface ItemProps {
   id?: string;
@@ -25,7 +26,7 @@ interface ItemProps {
   label: string;
   onClick?: () => void;
   icon: LucideIcon;
-  isSubject?: boolean; // NEW: Add this prop
+  isSubject?: boolean;
 }
 
 const Item = ({
@@ -39,9 +40,10 @@ const Item = ({
   level = 0,
   onExpand,
   expanded,
-  isSubject = false, // NEW: Default to false
+  isSubject = false,
 }: ItemProps) => {
   const router = useRouter();
+  const { removeDocument } = useDocument();
 
   const handleExpand = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     event.stopPropagation();
@@ -51,9 +53,10 @@ const Item = ({
   const handleArchive = async (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     event.stopPropagation();
     if (!id) return;
-
+  
     try {
       await archiveDocument(id);
+      removeDocument(id); // This will automatically update the UI
       toast.success("Moved to trash");
       router.push("/documents");
     } catch (error: any) {
@@ -75,7 +78,6 @@ const Item = ({
         active && "bg-primary/5 text-primary"
       )}
     >
-      {/* Only show chevron for subjects */}
       {!!id && isSubject && (
         <div
           role="button"
@@ -85,7 +87,6 @@ const Item = ({
           <ChevronIcon className="h-4 w-4 shrink-0 text-muted-foreground/50" />
         </div>
       )}
-      {/* Add spacing for non-subjects to align with subjects */}
       {!!id && !isSubject && (
         <div className="h-4 w-4 mr-1" />
       )}
