@@ -9,6 +9,7 @@ import {
   Search,
   Settings,
   Trash,
+  UserPlus,
 } from "lucide-react";
 import { useParams, usePathname, useRouter } from "next/navigation";
 import React, { ElementRef, useEffect, useRef, useState } from "react";
@@ -23,13 +24,13 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import TrashBox from "./trash-box";
+import Navbar from "./navbar";
 import useSearch from "@/hooks/use-search";
 import useSettings from "@/hooks/use-settings";
 import { useDocument } from "@/hooks/use-document";
-import { getDocument } from "@/lib/firestore";
+import { useJoinModal } from "@/hooks/use-join-modal";
+import { createDocument, getDocument } from "@/lib/firestore";
 
-import Navbar from "./navbar";
-import { createDocument } from "@/lib/firestore";
 
 const Navigation = () => {
   const router = useRouter();
@@ -39,7 +40,8 @@ const Navigation = () => {
   const pathname = usePathname();
   const isMobile = useMediaQuery("(max-width:768px)");
   
-  const { addDocument } = useDocument();
+  const  addDocument  = useDocument();
+  const joinModal = useJoinModal();
 
   const isResizingRef = useRef(false);
   const sidebarRef = useRef<ElementRef<"aside">>(null);
@@ -200,20 +202,29 @@ const Navigation = () => {
 
         {/* Study Hubs Section */}
         <div className="mt-4">
-          <div className="px-3 py-1 flex items-center justify-between">
-            <p className="text-sm font-semibold text-muted-foreground">
-              Study Hubs
-            </p>
-            <button
-              onClick={handleCreateStudyHub}
-              className="text-muted-foreground hover:text-primary p-1 rounded-sm hover:bg-neutral-200 dark:hover:bg-neutral-700"
-              title="New Subject"
-            >
-              <Plus className="h-4 w-4" />
-            </button>
-          </div>
-          <DocumentList type="studyhub" />
-        </div>
+  <div className="px-3 py-1 flex items-center justify-between">
+    <p className="text-sm font-semibold text-muted-foreground">
+      Study Hubs
+    </p>
+    <div className="flex gap-x-1">
+      <button
+        onClick={joinModal.onOpen}
+        className="text-muted-foreground hover:text-primary p-1 rounded-sm hover:bg-neutral-200 dark:hover:bg-neutral-700"
+        title="Join Study Hub"
+      >
+        <UserPlus className="h-4 w-4" />
+      </button>
+      <button
+        onClick={handleCreateStudyHub}
+        className="text-muted-foreground hover:text-primary p-1 rounded-sm hover:bg-neutral-200 dark:hover:bg-neutral-700"
+        title="New Subject"
+      >
+        <Plus className="h-4 w-4" />
+      </button>
+    </div>
+  </div>
+  <DocumentList type="studyhub" />
+</div>
 
         {/* Private Section */}
         <div className="mt-4">
