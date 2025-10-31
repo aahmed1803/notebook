@@ -8,6 +8,7 @@ import { Spinner } from "@/components/spinner";
 import { toast } from "sonner";
 import { debounce } from "lodash";
 import { useDocument } from "@/hooks/use-document";
+import { SubjectView } from "./subject-view";
 
 const DocumentIdPage = () => {
   const params = useParams();
@@ -31,7 +32,7 @@ const DocumentIdPage = () => {
       setIsLoading(true);
       const doc = await getDocument(params.documentId as string);
       setDocument(doc);
-      setGlobalDocument(doc.id, doc); // Store in global state
+      setGlobalDocument(doc.id, doc);
     } catch (error: any) {
       toast.error(error.message || "Failed to load document");
     } finally {
@@ -59,7 +60,7 @@ const DocumentIdPage = () => {
     debounce(async (documentId: string, title: string) => {
       try {
         await updateDocument(documentId, { title });
-        updateGlobalDocument(documentId, { title }); // Update global state
+        updateGlobalDocument(documentId, { title });
       } catch (error: any) {
         console.error("Error updating title:", error);
       }
@@ -83,6 +84,12 @@ const DocumentIdPage = () => {
     );
   }
 
+  // If it's a subject, show the subject view with notes list
+  if (document.isSubject) {
+    return <SubjectView subject={document} />;
+  }
+
+  // Otherwise, show the regular editor for notes
   return (
     <div className="pb-40">
       <div className="h-[35vh]" />
@@ -94,7 +101,7 @@ const DocumentIdPage = () => {
             value={document.title}
             onChange={(e) => {
               setDocument({ ...document, title: e.target.value });
-              updateGlobalDocument(document.id, { title: e.target.value }); // Update immediately
+              updateGlobalDocument(document.id, { title: e.target.value });
               handleTitleChange(document.id, e.target.value);
             }}
             placeholder="Untitled"
